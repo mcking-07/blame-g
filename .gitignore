@@ -1,0 +1,19 @@
+# py-venv
+.pyenv
+
+# python bytecode, optimized, dll files
+__pycache__/
+*.py[cod]
+*.so
+*.dll
+*.py*_cache/
+
+# build files
+build/
+dist/
+*.egg-info/
+*.egg
+
+# ruff files
+*.ruff
+*.ruff*_cache/
