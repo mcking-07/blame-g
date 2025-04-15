@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "blame-g"
-version = "0.1.0"
+version = "0.1.1"
 
 description = "blame-g is a command-line tool that analyzes git repositories and generates contributor statistics — including commits, lines added/deleted, files changed, pull requests, reverts, and more — beautifully rendered in a terminal table."
 readme = "README.md"
