@@ -8,7 +8,7 @@
 
 **Geddit?** Blame- *ji*? ;)
 
-![in-action](/assets/blame-g.png)
+![in-action](https://raw.githubusercontent.com/mcking-07/blame-g/refs/heads/main/assets/blame-g.png)
 
 ## Features
 
