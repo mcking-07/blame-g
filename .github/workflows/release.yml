@@ -1,0 +1,87 @@
+---
+name: release
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+
+      - name: upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: install dependencies
+        run: pip install -r requirements.txt -e .
+
+      - name: run lint
+        run: ruff check
+
+      - name: run tests
+        run: pytest
+
+  publish:
+    needs: ci
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+
+      - name: upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: install dependencies
+        run: pip install -r requirements.txt -e .
+
+      - name: build package
+        run: python -m build
+
+      - name: check if publishable
+        id: publishable
+        run: |
+          package_name=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['name'])")
+          python -m venv .pyenv
+          source .pyenv/bin/activate
+          pip install --upgrade pip
+          pip install "$package_name"
+          previous_version=$(pip show "$package_name" | grep Version | awk '{print $2}' || echo "0.0.0")
+          deactivate && rm -rf .pyenv
+          current_version=$(python -c "import toml; print(toml.load('pyproject.toml')['project']['version'])")
+          if dpkg --compare-versions "$current_version" gt "$previous_version"; then
+            echo -e "[+] version upgraded from [$previous_version] to [$current_version]"
+            echo "publish=true" >> $GITHUB_OUTPUT
+          else
+            echo -e "[+] version not upgraded. previous[$previous_version]; current[$current_version]."
+            echo "publish=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: publish package to pypi
+        if: steps.publishable.outputs.publish == 'true'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: twine upload dist/*
