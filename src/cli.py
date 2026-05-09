@@ -75,7 +75,11 @@ def fetch_commits_from(repo, branch):
   return list(repo.iter_commits(branch))
 
 
-pr_patterns = [compile(r"merge pull request #\d+", IGNORECASE), compile(r"merged in .* \(pull request #\d+\)", IGNORECASE), compile(r"see (merge|pull) request #\d+", IGNORECASE)]
+pr_patterns = [
+  compile(r"merge pull request #\d+", IGNORECASE),
+  compile(r"merged in .* \(pull request #\d+\)", IGNORECASE),
+  compile(r"see (merge|pull) request #\d+", IGNORECASE),
+]
 revert_pattern = compile(r"revert.*?this reverts commit ([a-f0-9]{7,40})", IGNORECASE | DOTALL)
 
 
